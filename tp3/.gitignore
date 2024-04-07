@@ -1,0 +1,5 @@
+yolov8n.pt
+MOT17/
+data/
+yolo/frames/
+yolo/output/
