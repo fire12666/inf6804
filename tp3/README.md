@@ -40,6 +40,10 @@ yolo
 
 Following commands must be executed in the root folder.
 
+### Inference
+
+> python yolo/yolo_tracking.py
+
 ### Evaluate on MOT17 Dataset
 
 *Replace ```MPNTrack``` with model name.*

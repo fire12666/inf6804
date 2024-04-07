@@ -10,7 +10,7 @@ for d in directories:
     model = YOLO('yolov8n.pt')
 
     frames_path = f"{root_folder}/{d}/img1"
-    output_file = f"data/trackers/mot_challenge/MOT17-train/DeepSort/data/{d}.txt"
+    output_file = f"data/trackers/mot_challenge/MOT17-train/yolo/data/{d}.txt"
 
     image_files = [f for f in os.listdir(frames_path) if f.endswith(('.jpg', '.png', '.jpeg'))]
 
