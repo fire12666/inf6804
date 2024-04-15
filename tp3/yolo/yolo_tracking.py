@@ -1,16 +1,19 @@
 import cv2, os
+import supervision as sv
 from ultralytics import YOLO
 
 # Open the video file
-root_folder = "MOT17/train"
+root_folder = "MOT20/train"
 directories = [d for d in os.listdir(root_folder)]
 
 for d in directories:
     # Load the YOLOv8 model
-    model = YOLO('yolov8n.pt')
+    model = YOLO('YOLOv9e.pt')
+
+    annotator = sv.BoxAnnotator()
 
     frames_path = f"{root_folder}/{d}/img1"
-    output_file = f"data/trackers/mot_challenge/MOT17-train/yolo/data/{d}.txt"
+    output_file = f"data/trackers/mot_challenge/MOT20-train/BotSort/data/{d}.txt"
 
     image_files = [f for f in os.listdir(frames_path) if f.endswith(('.jpg', '.png', '.jpeg'))]
 
@@ -25,24 +28,23 @@ for d in directories:
 
         frame = cv2.imread(os.path.join(frames_path, image_files[i]))
 
-        # Run YOLOv8 tracking on the frame, persisting tracks between frames
-        results = model.track(frame, persist=True, classes=[0], conf=0.3)
+        # Run YOLOv8.
+        results = model.track(frame, classes=[0], conf=0.1, iou=0.5, persist=True)
 
-        # Visualize the results on the frame
-        annotated_frame = results[0].plot()
+        detections = sv.Detections.from_ultralytics(results[0])
 
-        # Tensor to numpy array
-        boxes = results[0].boxes
+        labels = []
 
-
-        # Save the bounding boxes and the frame in a data/labels.txt file
         with open(output_file, "a") as file:
-            for j in range(len(boxes.xyxy)):
-                if boxes.id != None:
-                    file.write(f"{i + 1},{boxes.id[j]:.5f},{boxes.xyxy[j][0]:.5f},{boxes.xyxy[j][1]:.5f},{boxes.xywh[j][2]:.5f},{boxes.xywh[j][3]:.5f},1,-1,-1,-1\n")
+            for bbox, _, confidence, class_id, tracker_id, _ in detections:
+                if tracker_id is not None:
+                    labels.append(f"#{tracker_id} {model.model.names[class_id]} {confidence:0.2f}")
+                    file.write(f"{i + 1},{int(tracker_id)},{bbox[0]:.5f},{bbox[1]:.5f},{bbox[2] - bbox[0]:.5f},{bbox[3] - bbox[1]:.5f},{confidence:.2f},-1,-1,-1\n")
+
+        annotated_frame = annotator.annotate(scene=frame.copy(), detections=detections, labels=labels)
 
         # Display the annotated frame
-        cv2.imshow("YOLOv8 Tracking", annotated_frame)
+        cv2.imshow("YOLOv9 Tracking", annotated_frame)
 
         # Break the loop if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord("q"):

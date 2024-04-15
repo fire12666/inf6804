@@ -1,5 +1,7 @@
 yolov8n.pt
+yolov9e.pt
 MOT17/
+MOT20/
 data/
 yolo/frames/
 yolo/output/
